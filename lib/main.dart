@@ -9,7 +9,7 @@ class BytebankApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: FormularioTransferencia(),
+        body: ListaTransferencias(),
       ),
     );
   }
@@ -24,34 +24,43 @@ class FormularioTransferencia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        //Campo Numero da Conta
-        Editor(
-            controlador: _controladorCampoNumeroConta,
-            rotulo: 'Número da conta',
-            dica: '0000'),
-        //Campo Valor
-        Editor(
-            controlador: _controladorCampoValor,
-            rotulo: 'Valor',
-            dica: '0.00',
-            icone: Icons.monetization_on),
-        //Botão Confirmar
-        ElevatedButton(
-          child: const Text('Confirmar'),
-          onPressed: () => _criaTransferencia(),
-        )
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Criando Transferência'),
+      ),
+      body: Column(
+        children: [
+          //Campo Numero da Conta
+          Editor(
+              controlador: _controladorCampoNumeroConta,
+              rotulo: 'Número da conta',
+              dica: '0000'),
+          //Campo Valor
+          Editor(
+              controlador: _controladorCampoValor,
+              rotulo: 'Valor',
+              dica: '0.00',
+              icone: Icons.monetization_on),
+          //Botão Confirmar
+          ElevatedButton(
+            child: const Text('Confirmar'),
+            onPressed: () => _criaTransferencia(context),
+          )
+        ],
+      ),
     );
   }
 
   //Método que cria as transferencias
-  void _criaTransferencia() {
+  void _criaTransferencia(BuildContext context) {
     final int? numeroConta = int.tryParse(_controladorCampoNumeroConta.text);
     final double? valor = double.tryParse(_controladorCampoValor.text);
-    final transferenciaCriada = Transferencia(valor!, numeroConta!);
-    debugPrint('$transferenciaCriada');
+    if (numeroConta != null && valor != null) {
+      final transferenciaCriada = Transferencia(valor, numeroConta);
+      debugPrint('criando transferencia');
+      debugPrint('$transferenciaCriada');
+      Navigator.pop(context, transferenciaCriada);
+    }
   }
 }
 
@@ -103,7 +112,16 @@ class ListaTransferencias extends StatelessWidget {
 
       //Botão '+'
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          final Future<Transferencia?> future =
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return FormularioTransferencia();
+          }));
+          future.then((transferenciaRecebida) {
+            debugPrint('chegou no then do future');
+            debugPrint('$transferenciaRecebida');
+          });
+        },
         child: const Icon(Icons.add),
       ),
     );
