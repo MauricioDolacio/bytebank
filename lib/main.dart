@@ -8,15 +8,26 @@ class BytebankApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: ListaTransferencias(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: Colors.deepPurple[500],
+          secondary: Colors.deepPurple[500],
+        ),
       ),
+      home: ListaTransferencias(),
     );
   }
 }
 
 //Tela: Formulario de Transferencia
-class FormularioTransferencia extends StatelessWidget {
+class FormularioTransferencia extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return FormularioTransferenciaState();
+  }
+}
+
+class FormularioTransferenciaState extends State<FormularioTransferencia> {
   //Criando controladores (recebem as informações dos campos)
   final TextEditingController _controladorCampoNumeroConta =
       TextEditingController();
@@ -26,27 +37,29 @@ class FormularioTransferencia extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Criando Transferência'),
+        title: const Text('Criando Transferência'),
       ),
-      body: Column(
-        children: [
-          //Campo Numero da Conta
-          Editor(
-              controlador: _controladorCampoNumeroConta,
-              rotulo: 'Número da conta',
-              dica: '0000'),
-          //Campo Valor
-          Editor(
-              controlador: _controladorCampoValor,
-              rotulo: 'Valor',
-              dica: '0.00',
-              icone: Icons.monetization_on),
-          //Botão Confirmar
-          ElevatedButton(
-            child: const Text('Confirmar'),
-            onPressed: () => _criaTransferencia(context),
-          )
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            //Campo Numero da Conta
+            Editor(
+                controlador: _controladorCampoNumeroConta,
+                rotulo: 'Número da conta',
+                dica: '0000'),
+            //Campo Valor
+            Editor(
+                controlador: _controladorCampoValor,
+                rotulo: 'Valor',
+                dica: '0.00',
+                icone: Icons.monetization_on),
+            //Botão Confirmar
+            ElevatedButton(
+              child: const Text('Confirmar'),
+              onPressed: () => _criaTransferencia(context),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -92,12 +105,20 @@ class Editor extends StatelessWidget {
 }
 
 //Tela: Lista de Transferencias
-class ListaTransferencias extends StatelessWidget {
+class ListaTransferencias extends StatefulWidget {
   final List<Transferencia> _transferencias = [];
 
+  ListaTransferencias({super.key});
+
+  @override
+  State<StatefulWidget> createState() {
+    return ListaTransferenciasState();
+  }
+}
+
+class ListaTransferenciasState extends State<ListaTransferencias> {
   @override
   Widget build(BuildContext context) {
-    _transferencias.add(Transferencia(100.00, 1000));
     return Scaffold(
       //Barra de cima
       appBar: AppBar(
@@ -106,9 +127,9 @@ class ListaTransferencias extends StatelessWidget {
 
       //Coluna de Cards
       body: ListView.builder(
-        itemCount: _transferencias.length,
+        itemCount: widget._transferencias.length,
         itemBuilder: (context, indice) {
-          final transferencia = _transferencias[indice];
+          final transferencia = widget._transferencias[indice];
           return ItemTransferencia(transferencia);
         },
       ),
@@ -123,7 +144,11 @@ class ListaTransferencias extends StatelessWidget {
           future.then((transferenciaRecebida) {
             debugPrint('chegou no then do future');
             debugPrint('$transferenciaRecebida');
-            _transferencias.add(transferenciaRecebida!);
+            setState(() {
+              if (transferenciaRecebida != null) {
+                widget._transferencias.add(transferenciaRecebida);
+              }
+            });
           });
         },
         child: const Icon(Icons.add),
